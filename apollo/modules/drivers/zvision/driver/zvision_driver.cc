@@ -101,15 +101,6 @@ void Ml30Driver::Init() {
   input_->init(config_.lidar_recv_port());
 }
 
-void Ml30sa1Driver::Init() {
-  packets_per_scan_ = config_.packets_per_scan();
-  AINFO << "publishing " << packets_per_scan_ << " packets per scan";
-
-  // open zvision input device
-  input_.reset(new SocketInput());
-  input_->init(config_.lidar_recv_port());
-}
-
 bool Ml30Driver::Poll(const std::shared_ptr<ZvisionScan>& scan) {
 
   int poll_result = PollStandard(scan);
@@ -131,7 +122,47 @@ bool Ml30Driver::Poll(const std::shared_ptr<ZvisionScan>& scan) {
   return true;
 }
 
+void Ml30sa1Driver::Init() {
+  packets_per_scan_ = config_.packets_per_scan();
+  AINFO << "publishing " << packets_per_scan_ << " packets per scan";
+
+  // open zvision input device
+  input_.reset(new SocketInput());
+  input_->init(config_.lidar_recv_port());
+}
+
 bool Ml30sa1Driver::Poll(const std::shared_ptr<ZvisionScan>& scan) {
+
+  int poll_result = PollStandard(scan);
+
+  if (poll_result == SOCKET_TIMEOUT || poll_result == RECIEVE_FAIL) {
+    return false;  // poll again
+  }
+
+  if (scan->firing_pkts().empty()) {
+    AINFO << "Get an empty scan from port: " << config_.lidar_recv_port();
+    return false;
+  }
+
+  // publish message using time of last packet read
+  ADEBUG << "Publishing a full Zvision scan.";
+  scan->mutable_header()->set_timestamp_sec(cyber::Time().Now().ToSecond());
+  scan->mutable_header()->set_frame_id(config_.frame_id());
+  scan->set_model(config_.model());
+
+  return true;
+}
+
+void MlxDriver::Init() {
+  packets_per_scan_ = config_.packets_per_scan();
+  AINFO << "publishing " << packets_per_scan_ << " packets per scan";
+
+  // open zvision input device
+  input_.reset(new SocketInput());
+  input_->init(config_.lidar_recv_port());
+}
+
+bool MlxDriver::Poll(const std::shared_ptr<ZvisionScan>& scan) {
 
   int poll_result = PollStandard(scan);
 
@@ -162,6 +193,10 @@ ZvisionDriver* ZvisionDriverFactory::CreateDriver(const Config& config) {
     }
     case ML30SA1: {
       driver = new Ml30sa1Driver(config);
+      break;
+    }
+    case MLX: {
+      driver = new MlxDriver(config);
       break;
     }
     default:

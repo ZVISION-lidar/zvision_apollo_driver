@@ -26,6 +26,7 @@ cc_library(
         "convert.cc",
         "ml30_parser.cc",
         "ml30sa1_parser.cc",
+        "mlx_parser.cc",
         "parser.cc",
     ],
     hdrs = [

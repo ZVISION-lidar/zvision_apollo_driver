@@ -230,6 +230,8 @@ ZvisionParser *ZvisionParserFactory::CreateParser(Config source_config) {
     return new Ml30Parser(config);
   } else if (config.model() == ML30SA1) {
     return new Ml30sa1Parser(config);
+  } else if (config.model() == MLX) {
+    return new MlxParser(config);
   } else {
     AERROR << "invalid model, must be ML30|ML30SA1";
     return nullptr;

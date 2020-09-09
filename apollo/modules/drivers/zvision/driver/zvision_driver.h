@@ -78,6 +78,16 @@ class Ml30sa1Driver : public ZvisionDriver {
 
 };
 
+class MlxDriver : public ZvisionDriver {
+ public:
+  explicit MlxDriver(const Config &config) : ZvisionDriver(config) {config_.set_packets_per_scan(400);}
+  ~MlxDriver() {}
+
+  void Init() override;
+  bool Poll(const std::shared_ptr<ZvisionScan> &scan) override;
+
+};
+
 class ZvisionDriverFactory {
  public:
   static ZvisionDriver *CreateDriver(const Config &config);

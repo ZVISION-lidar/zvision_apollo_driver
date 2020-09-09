@@ -166,6 +166,20 @@ class Ml30sa1Parser : public ZvisionParser {
 
 };  // class Ml30sa1Parser
 
+class MlxParser : public ZvisionParser {
+ public:
+  explicit MlxParser(const Config& config) : ZvisionParser(config) {}
+  ~MlxParser() {}
+
+  void GeneratePointcloud(const std::shared_ptr<ZvisionScan>& scan_msg,
+                          std::shared_ptr<PointCloud> out_msg);
+  //void setup() override;
+
+ private:
+
+  void Unpack(const ZvisionPacket& pkt, std::shared_ptr<PointCloud> pc);
+
+};  // class MlxParser
 
 class ZvisionParserFactory {
  public:
